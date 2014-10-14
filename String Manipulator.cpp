@@ -1,3 +1,5 @@
+
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -18,12 +20,14 @@ void ForceUpperCase(string file, string file_name);
 string NewFileName(string file_name, string function);
 void ForceLowerCase(string file, string file_name);
 void CorrectCapitalization(string file, string file_name);
+bool isLowerCase(char c);
 int main()
 {
 	string file = "", file_name;
 	int function;
 	bool file_exists;
 	char keep_going = 0;
+	do {
 	file_name = GetFileName();
 	file_exists = ReadFile(file_name, file);
 	if(file_exists) {
@@ -51,9 +55,11 @@ int main()
 				break;
 		case 7: CorrectCapitalization(file, file_name);
 				break;
-
 		}
 	}
+	cout << "\nRun again? (y/n) ";
+	cin >> keep_going;
+	}while (keep_going == 'y');
 
 	return 0;
 }
@@ -70,8 +76,6 @@ bool ReadFile(string file_name, string &file) {
 	string line;
 	  ifstream myfile (file_name.c_str());
 	  if (myfile.is_open()) {
-		  cout << "File << " << file_name << " >> has been accessed...\n";
-		  cout << "Reading file...\n";
 	    while ( getline (myfile,line) ) {
 	      file = file + line;
 	    }
@@ -85,7 +89,7 @@ bool ReadFile(string file_name, string &file) {
 }
 int Menu() {
 	int choice;
-	cout << "Available Functions\n";
+	cout << "\nAvailable Functions\n";
 	cout << "----------------------------------------\n";
 	cout << "1. Character Count\n";
 	cout << "2. Character Frequency\n";
@@ -245,8 +249,15 @@ void CorrectCapitalization(string file, string file_name) {
 					file[i] = 'I';
 			}
 		}
+		else if(isLowerCase(file[i]) == 1 && file[i - 1] == ' ' && file[i - 2] == '.')
+			file[i] = file[i] - 32;
 	}
 	cout << "Edited text: \n\n";
 	cout << file;
 }
-
+bool isLowerCase(char c) {
+	bool lower = 1;
+		if(int(c) >= 65 && int(c) <= 90)
+			lower = 0;
+	return lower;
+}
