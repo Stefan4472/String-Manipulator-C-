@@ -17,7 +17,7 @@ int Digits(int n);
 void WordCount(string file);
 void LineCount(string file_name);
 void ForceUpperCase(string file, string file_name);
-string NewFileName(string file_name, string function);
+string NewFile(string file_name, string function, string file);
 void ForceLowerCase(string file, string file_name);
 void CorrectCapitalization(string file, string file_name);
 bool isLowerCase(char c);
@@ -218,10 +218,17 @@ void ForceUpperCase(string file, string file_name) {
 	new_file_name = NewFileName(file_name, function);
 	/// write file with file_edited and new_file_name
 }
-string NewFileName(string file_name, string function) {
+string NewFile(string file_name, string function, string file) {
 	string new_file_name;
-	/* currently assuming file names don't have an ending (like ".txt") */
+	/* currently assuming file names don't have an ending */
 	new_file_name = file_name + function;
+	ofstream myfile (new_file_name.c.c_str());
+  if (myfile.is_open())
+  {
+    myfile << file;
+    myfile.close();
+  }
+  else cout << "Unable to open file";
 	return new_file_name;
 }
 void ForceLowerCase(string file, string file_name) {
