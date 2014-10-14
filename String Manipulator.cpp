@@ -1,5 +1,3 @@
-
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -17,16 +15,20 @@ int Digits(int n);
 void WordCount(string file);
 void LineCount(string file_name);
 void ForceUpperCase(string file, string file_name);
-string NewFile(string file_name, string function, string file);
+string NewFile(string file_name, string suffix, string file);
 void ForceLowerCase(string file, string file_name);
 void CorrectCapitalization(string file, string file_name);
 bool isLowerCase(char c);
+void FixContractions(string file, string file_name);
 int main()
 {
 	string file = "", file_name;
 	int function;
 	bool file_exists;
 	char keep_going = 0;
+	cout << "Stefan's String Manipulator\n";
+	cout << "\t\tPress enter\n";
+	cin.get();
 	do {
 	file_name = GetFileName();
 	file_exists = ReadFile(file_name, file);
@@ -54,6 +56,8 @@ int main()
 					ForceLowerCase(file, file_name);
 				break;
 		case 7: CorrectCapitalization(file, file_name);
+				break;
+		case 8: FixContractions(file, file_name);
 				break;
 		}
 	}
@@ -98,6 +102,7 @@ int Menu() {
 	cout << "5. Force Upper Case\n";
 	cout << "6. Force Lower Case\n";
 	cout << "7. Correct capitalization\n";
+	cout << "8. Fix Contractions\n";
 	/// help function
 	cout << "----------------------------------------\n";
 	cout << "Enter choice: ";
@@ -205,7 +210,7 @@ void LineCount(string file_name) {
 }
 void ForceUpperCase(string file, string file_name) {
 	int char_value;
-	string file_edited = "", new_file_name;
+	string file_edited = "";
 	for(int i = 0; i < file.size(); i++) {
 		char_value = int(file[i]);
 		if(char_value >= 97 && char_value <= 122)
@@ -214,15 +219,14 @@ void ForceUpperCase(string file, string file_name) {
 	}
 	cout << "Edited text: \n";
 	cout << file_edited;
-	string function = "uppercase";
-	new_file_name = NewFileName(file_name, function);
-	/// write file with file_edited and new_file_name
+	string suffix = "uppercase";
+	string new_file_name = NewFile(file_name, suffix, file);
+	cout << "New file saved as << " << new_file_name << " >>\n";
 }
-string NewFile(string file_name, string function, string file) {
-	string new_file_name;
+string NewFile(string file_name, string suffix, string file) {
 	/* currently assuming file names don't have an ending */
-	new_file_name = file_name + function;
-	ofstream myfile (new_file_name.c.c_str());
+	string new_file_name = file_name + "_" + suffix;
+	ofstream myfile (new_file_name.c_str());
   if (myfile.is_open())
   {
     myfile << file;
@@ -233,7 +237,7 @@ string NewFile(string file_name, string function, string file) {
 }
 void ForceLowerCase(string file, string file_name) {
 	int char_value;
-	string file_edited = "", new_file_name; /// new string for file_edited is not necessary
+	string file_edited = ""; /// new string for file_edited is not necessary
 	for(int i = 0; i < file.size(); i++) {
 		char_value = int(file[i]);
 		if(char_value >= 65 && char_value <= 90)
@@ -242,9 +246,9 @@ void ForceLowerCase(string file, string file_name) {
 	}
 	cout << "Edited text: \n";
 	cout << file_edited;
-	string function = "lowercase";
-	new_file_name = NewFileName(file_name, function);
-	/// write file with file_edited and new_file_name
+	string suffix = "lowercase";
+	string new_file_name = NewFile(file_name, suffix, file);
+	cout << "New file saved as << " << new_file_name << " >>\n";
 }
 void CorrectCapitalization(string file, string file_name) {
 	for(int i = 0; i < file.size(); i++) {
@@ -267,4 +271,24 @@ bool isLowerCase(char c) {
 		if(int(c) >= 65 && int(c) <= 90)
 			lower = 0;
 	return lower;
+}
+void FixContractions(string file, string file_name) { /// don't won't can't
+	string file_edited;
+	for(int i = 0; i < file.size(); i++) {
+		if(file[i + 1] == 39) { /// I'd I'll I'm
+			if(file[i] == 'I') {
+				if(file[i + 2] == 'd')
+					file_edited = file_edited + "I would";
+				else if(file[i + 2] == 'l' && file[i + 3] == "l")
+					file_edited = file_edited + "I will";
+				else if(file[i + 2] == 'm')
+					file_edited = file_edited + "I am";
+				else if(file[i + 2] == 'v' && file[i + 3] == 'e')
+					file_edited = file_edited + "I have";
+			}
+		}
+		else if(file[i + 2] == 39) { ///
+
+		}
+	}
 }
