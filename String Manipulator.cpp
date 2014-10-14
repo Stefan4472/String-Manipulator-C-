@@ -7,7 +7,7 @@ using namespace std;
 
 
 string GetFileName();
-bool ReadFile(string file_name);
+bool ReadFile(string file_name, string &file);
 int Menu();
 void CharacterCount(string file);
 void CharacterFrequency(string file);
@@ -25,7 +25,7 @@ int main()
 	bool file_exists;
 	char keep_going = 0;
 	file_name = GetFileName();
-	file_exists = ReadFile(file_name);
+	file_exists = ReadFile(file_name, file);
 	if(file_exists) {
 		function = Menu();
 		switch(function) {
@@ -65,11 +65,13 @@ string GetFileName() /// possible additions: makes sure file is in the right loc
 	cin >> file_name;
 	return file_name;
 }
-bool ReadFile(string file_name, string& file) {
+bool ReadFile(string file_name, string &file) {
 	bool file_exists = 1;
 	string line;
 	  ifstream myfile (file_name.c_str());
 	  if (myfile.is_open()) {
+		  cout << "File << " << file_name << " >> has been accessed...\n";
+		  cout << "Reading file...\n";
 	    while ( getline (myfile,line) ) {
 	      file = file + line;
 	    }
@@ -96,6 +98,7 @@ int Menu() {
 	cout << "----------------------------------------\n";
 	cout << "Enter choice: ";
 	cin >> choice;
+	cout << endl;
 	return choice;
 }
 void CharacterCount(string file) {
@@ -175,7 +178,7 @@ void WordCount(string file) {
 	first_word = file.find(" ");
 	word_counter++;
 	for(int i = first_word; i < file.size(); i++) {
-		if(file[i] != " ")
+		if(file[i] != ' ')
 			word = 1;
 		else {
 			word = 0;
@@ -196,7 +199,7 @@ void LineCount(string file_name) {
 	  }
 	  cout << "File has " << line_counter << " lines\n";
 }
-void ForceUpperCase(string &file, string file_name) {
+void ForceUpperCase(string file, string file_name) {
 	int char_value;
 	string file_edited = "", new_file_name;
 	for(int i = 0; i < file.size(); i++) {
@@ -234,12 +237,16 @@ void ForceLowerCase(string file, string file_name) {
 }
 void CorrectCapitalization(string file, string file_name) {
 	for(int i = 0; i < file.size(); i++) {
-		if(file[i] == "i" && file[i - 1] == " ") { /// won't work if file[0] needs to be capitalized
-			if(file[i + 1] == " ")
-				file[i] = "I";
-			else if(file[i + 1] == "'") {
-				if(file[i + 2] == "m" || (file[i + 2] == "l" && file[i + 3] == "l") || file[i + 2] == "d" || (file[i + 2] == "v" && file[i + 3] == "e"))
-					file[i] = "I";
+		if(file[i] == 'i' && file[i - 1] == ' ') { /// won't work if file[0] needs to be capitalized
+			if(file[i + 1] == ' ')
+				file[i] = 'I';
+			else if(int(file[i + 1]) == 39) {
+				if(file[i + 2] == 'm' || (file[i + 2] == 'l' && file[i + 3] == 'l') || file[i + 2] == 'd' || (file[i + 2] == 'v' && file[i + 3] == 'e'))
+					file[i] = 'I';
 			}
+		}
 	}
+	cout << "Edited text: \n\n";
+	cout << file;
 }
+
