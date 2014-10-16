@@ -20,6 +20,8 @@ void ForceLowerCase(string file, string file_name);
 void CorrectCapitalization(string file, string file_name);
 bool isLowerCase(char c);
 void FixContractions(string file, string file_name);
+bool isWord(string word, int start_location, string file);
+bool isUpperCase(char c);
 int main()
 {
 	string file = "", file_name;
@@ -27,7 +29,7 @@ int main()
 	bool file_exists;
 	char keep_going = 0;
 	cout << "Stefan's String Manipulator\n";
-	cout << "\t\tPress enter\n";
+	cout << "\tPress enter\n";
 	cin.get();
 	do {
 	file_name = GetFileName();
@@ -220,7 +222,7 @@ void ForceUpperCase(string file, string file_name) {
 	cout << "Edited text: \n";
 	cout << file_edited;
 	string suffix = "uppercase";
-	string new_file_name = NewFile(file_name, suffix, file);
+	string new_file_name = NewFile(file_name, suffix, file_edited);
 	cout << "New file saved as << " << new_file_name << " >>\n";
 }
 string NewFile(string file_name, string suffix, string file) {
@@ -247,7 +249,7 @@ void ForceLowerCase(string file, string file_name) {
 	cout << "Edited text: \n";
 	cout << file_edited;
 	string suffix = "lowercase";
-	string new_file_name = NewFile(file_name, suffix, file);
+	string new_file_name = NewFile(file_name, suffix, file_edited);
 	cout << "New file saved as << " << new_file_name << " >>\n";
 }
 void CorrectCapitalization(string file, string file_name) {
@@ -272,23 +274,44 @@ bool isLowerCase(char c) {
 			lower = 0;
 	return lower;
 }
-void FixContractions(string file, string file_name) { /// don't won't can't
-	string file_edited;
+void FixContractions(string file, string file_name) { /// so messed up
+	string file_edited, c, file_new = "";
+	string contractions [12] = {"aren't","can't","couldn't","didn't","doesn't","don't","handn't","hasn't","haven't","he'd","he'll","he's"};
+	string contracted [12] = {"are not","cannot","could not","did not","does not","do not","had not","has not", "have not", "he would", "he will", "he is"};
+	bool un_contracted, b;
 	for(int i = 0; i < file.size(); i++) {
-		if(file[i + 1] == 39) { /// I'd I'll I'm
-			if(file[i] == 'I') {
-				if(file[i + 2] == 'd')
-					file_edited = file_edited + "I would";
-				else if(file[i + 2] == 'l' && file[i + 3] == "l")
-					file_edited = file_edited + "I will";
-				else if(file[i + 2] == 'm')
-					file_edited = file_edited + "I am";
-				else if(file[i + 2] == 'v' && file[i + 3] == 'e')
-					file_edited = file_edited + "I have";
+		for(int j = 0; j < 12; j++) {
+			c = contractions[j];
+			///cout << "contractions [" << j << "] = " << c << endl;;
+			b = isWord(c, i, file);
+			if(b)
+				cout << "isWord (" << c << "," << i << ") = " <<  b << endl;
+			if(isWord(c, i, file)) {
+				cout << "isWord is true\n";
+				file_edited = file_edited + contracted[j];
+				un_contracted = 1;
+				j = 12;
+				i = i + c.size() - 1;
+			}
+			else if(!(isWord(c, i, file)) && j == 4)
+					file_edited = file_edited + file[i];
 			}
 		}
-		else if(file[i + 2] == 39) { ///
+	cout << "Edited text: \n\n";
+	cout << file_edited;
 
-		}
+}
+bool isWord(string word, int start_location, string file) { /// possible problems
+	bool correct = 1;
+	for(int i = start_location; i < start_location + word.size(); i++) {
+		if(file[i] != word[i])
+			correct = 0;
 	}
+	return correct;
+}
+bool isUpperCase(char c) {
+	bool upper = 1;
+		if(int(c) >= 97 && int(c) <= 122)
+			upper = 0;
+	return upper;
 }
