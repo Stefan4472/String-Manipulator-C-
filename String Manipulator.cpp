@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -21,14 +22,15 @@ bool isLowerCase(char c);
 void FixContractions(string file, string file_name);
 bool isWord(string word, int start_location, string file);
 bool isUpperCase(char c);
+void WordFrequency(string file);
 int main()
 {
 	string file = "", file_name;
 	int function;
 	bool file_exists;
 	char keep_going = 0;
-	cout << "Stefan's String Manipulator\n";
-	cout << "\tPress enter\n";
+	cout << "Plain+Simple String Manipulator v. 0.2\n";
+	cout << "\t    Press enter\n";
 	cin.get();
 	do {
 	file_name = GetFileName();
@@ -59,6 +61,8 @@ int main()
 		case 7: CorrectCapitalization(file, file_name);
 				break;
 		case 8: FixContractions(file, file_name);
+				break;
+		case 9: WordFrequency(file);
 				break;
 		}
 	}
@@ -104,6 +108,7 @@ int Menu() {
 	cout << "6. Force Lower Case\n";
 	cout << "7. Correct capitalization\n";
 	cout << "8. Fix Contractions\n";
+	cout << "9. Word Frequency\n";
 	/// help function
 	cout << "----------------------------------------\n";
 	cout << "Enter choice: ";
@@ -112,7 +117,13 @@ int Menu() {
 	return choice;
 }
 void CharacterCount(string file) {
-	cout << "File has " << file.size() << " characters\n";
+	int char_count = 0;
+	cout << "File has " << file.size() << " characters, ";
+	for(int i = 0; i < file.size(); i++) {
+		if(file[i] != 32)
+			char_count++;
+	}
+	cout << char_count << " not including spaces\n";
 }
 void CharacterFrequency(string file) {
 	int char_int, unique_chars = 0, size = 0;
@@ -122,31 +133,37 @@ void CharacterFrequency(string file) {
 		char_list[i] = i;
 		frequencies[i] = 0;
 	}
-	for(int i = 0; i < file.size(); i++) {
+	for(int i = 32; i < file.size(); i++) {
 		char_int = int(file[i]);
 		frequencies[char_int]++;
 	}
-	for(int i = 0; i <= 255; i++) {
+	for(int i = 32; i <= 255; i++) {
 		if(frequencies[i] > 0)
 			unique_chars++;
 	}
 	cout << unique_chars << " unique characters found.\n\n";
-		cout << "| Ascii value | Char | Frequency |\n"; /// ADD FORMATTING
+		cout << "| Ascii value | Char | Frequency |\n";
 		cout << "---------------------------------\n";
-		for(int i = 0; i <= 255; i++)
+		for(int i = 32; i <= 255; i++)
 		{
 			if(frequencies[i] > 0) {
-				size = Digits(frequencies[i]);
+				size = Digits(char_list[i]);
 				cout << "|";
-				for(int j = 1; j <= 13; j++) {
-					if(j == (13 - size) / 2)
+				for(int j = 1; j <= (13 - size)/ 2 + 1; j++) {
+					if(j == (13 - size) / 2 + 1)
 						cout << char_list[i]; /* cout ascii value of char */
 					else
 						cout << " ";
 				}
+				if(size == 1)
+					cout << "       ";
+				else if(size == 2)
+					cout << "      ";
+				else
+					cout << "     ";
 				cout << "|";
 				for(int j = 1; j <= 6; j++) {
-					if(j == (6 - size) / 2)
+					if(j == 4)
 						cout << char(char_list[i]); /* cout char */
 					else
 						cout << " ";
@@ -155,7 +172,7 @@ void CharacterFrequency(string file) {
 				size = Digits(frequencies[i]);
 				for(int j = 1; j <= 11; j++) {/* currently can only handle values less than 10^11 before table explodes */
 										/// add scientific notation for large numbers?
-					if(j == (11 - size) / 2)
+					if(j == (11 - size) / 2 + 1)
 						cout << frequencies[i]; /* cout occurences */
 					else
 						cout << " ";
@@ -175,7 +192,7 @@ int Digits(int n) { /* only for values 0 <= x <= 256 */
 		num_digits = 3;
 	return num_digits;
 }
-void WordCount(string file) {
+void WordCount(string file) { // improve definition of "word"
 	int word_counter = 0, first_word;
 	bool word = 0;
 	first_word = file.find(" ");
@@ -244,7 +261,7 @@ void ForceLowerCase(string file, string file_name) {
 	string new_file_name = NewFile(file_name, suffix, file_edited);
 	cout << "New file saved as << " << new_file_name << " >>\n";
 }
-void CorrectCapitalization(string file, string file_name) {
+void CorrectCapitalization(string file, string file_name) { // implement arrays, like with FixContractions
 	for(int i = 0; i < file.size(); i++) {
 		if(file[i] == 'i' && file[i - 1] == ' ') { /// won't work if file[0] needs to be capitalized
 			if(file[i + 1] == ' ')
@@ -266,26 +283,24 @@ bool isLowerCase(char c) {
 			lower = 0;
 	return lower;
 }
-void FixContractions(string file, string file_name) { /// so messed up
+void FixContractions(string file, string file_name) { // buggy
 	string file_edited, c, file_new = "";
 	string contractions [12] = {"aren't","can't","couldn't","didn't","doesn't","don't","handn't","hasn't","haven't","he'd","he'll","he's"};
 	string contracted [12] = {"are not","cannot","could not","did not","does not","do not","had not","has not", "have not", "he would", "he will", "he is"};
-	bool un_contracted, b;
 	for(int i = 0; i < file.size(); i++) {
 		for(int j = 0; j < 12; j++) {
 			c = contractions[j];
 			///cout << "contractions [" << j << "] = " << c << endl;;
-			b = isWord(c, i, file);
-			if(b)
-				cout << "isWord (" << c << "," << i << ") = " <<  b << endl;
+			///b = isWord(c, i, file);
+			///if(b)
+				///cout << "isWord (" << c << "," << i << ") = " <<  b << endl;
 			if(isWord(c, i, file)) {
-				cout << "isWord is true\n";
+				///cout << "isWord is true\n";
 				file_edited = file_edited + contracted[j];
-				un_contracted = 1;
 				j = 12;
 				i = i + c.size() - 1;
 			}
-			else if(!(isWord(c, i, file)) && j == 4)
+			else if(j == 11)
 					file_edited = file_edited + file[i];
 			}
 		}
@@ -294,16 +309,53 @@ void FixContractions(string file, string file_name) { /// so messed up
 
 }
 bool isWord(string word, int start_location, string file) { /// possible problems
-	bool correct = 1;
 	for(int i = start_location; i < start_location + word.size(); i++) {
 		if(file[i] != word[i])
-			correct = 0;
+			return 0;
 	}
-	return correct;
+	return 1;
 }
 bool isUpperCase(char c) {
 	bool upper = 1;
 		if(int(c) >= 97 && int(c) <= 122)
 			upper = 0;
 	return upper;
+}
+void WordFrequency(string file) {
+	vector<string> words; /* empty vector */
+	vector<int> frequencies; /* empty vector */
+	int first_word, end_location;
+	string word = "", compare;
+	bool is_word;
+	first_word = file.find(" ");
+	for(int i = 0; i < first_word; i++)
+		word = word + file[i];
+	words.push_back(word);
+	frequencies.push_back(1);
+	for(int i = first_word; i < file.size(); i++) {
+		if(file[i] != ' ')
+			is_word = 1;
+		else
+			is_word = 0;
+		if(is_word == 1) {
+			word = ""; /* initialize word each time */
+			for(int j = i; i < file.size(); i++) { /* scan for the next space */
+				if(file[j] == 32) {
+					end_location = j;
+					j = file.size();
+				}
+				else
+					word = word + file[j];
+			}
+			for(int k = 0; k < words.size(); k++) {
+				compare = words[k];
+				if(word == compare)
+					frequencies[k]++;
+				else {
+					words.push_back(word);
+					frequencies.push_back(1);
+				}
+			}
+		}
+	}
 }
