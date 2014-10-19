@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <vector>
 
 using namespace std;
 
@@ -116,55 +115,48 @@ void CharacterCount(string file) {
 	cout << "File has " << file.size() << " characters\n";
 }
 void CharacterFrequency(string file) {
-	int char_int, unique_chars, size;
-	vector<vector<int> > frequencies(255);
+	int char_int, unique_chars = 0, size = 0;
+	int char_list [255];
+	int frequencies[255];
 	for(int i = 0; i < 255; i++) {
-		frequencies[i].resize(2);
-	}
-	for(int i = 0; i <= 255; i++) {
-		frequencies[i][0] = i; /// want 256 x 2 vector
-		frequencies[i][1] = 0; /// set char counter to 0
+		char_list[i] = i;
+		frequencies[i] = 0;
 	}
 	for(int i = 0; i < file.size(); i++) {
 		char_int = int(file[i]);
-		for(int j = 0; j <= 255; j++) {
-			if(char_int == frequencies[i][0]) {
-				frequencies[i][1]++;
-				j = 256; /* break loop */
-			}
-		}
+		frequencies[char_int]++;
 	}
 	for(int i = 0; i <= 255; i++) {
-		if(frequencies[i][1] > 0)
+		if(frequencies[i] > 0)
 			unique_chars++;
 	}
-	cout << unique_chars << " unique characters found.";
+	cout << unique_chars << " unique characters found.\n\n";
 		cout << "| Ascii value | Char | Frequency |\n"; /// ADD FORMATTING
 		cout << "---------------------------------\n";
 		for(int i = 0; i <= 255; i++)
 		{
-			if(frequencies[i][1] > 0) {
-				size = Digits(frequencies[i][0]);
+			if(frequencies[i] > 0) {
+				size = Digits(frequencies[i]);
 				cout << "|";
 				for(int j = 1; j <= 13; j++) {
 					if(j == (13 - size) / 2)
-						cout << frequencies[i][0]; /* cout ascii value of char */
+						cout << char_list[i]; /* cout ascii value of char */
 					else
 						cout << " ";
 				}
 				cout << "|";
 				for(int j = 1; j <= 6; j++) {
 					if(j == (6 - size) / 2)
-						cout << char(frequencies[i][0]); /* cout char */
+						cout << char(char_list[i]); /* cout char */
 					else
 						cout << " ";
 				}
 				cout << "|";
-				size = Digits(frequencies[i][1]);
+				size = Digits(frequencies[i]);
 				for(int j = 1; j <= 11; j++) {/* currently can only handle values less than 10^11 before table explodes */
 										/// add scientific notation for large numbers?
 					if(j == (11 - size) / 2)
-						cout << frequencies[i][1]; /* cout occurences */
+						cout << frequencies[i]; /* cout occurences */
 					else
 						cout << " ";
 				}
