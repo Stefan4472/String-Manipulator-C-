@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -23,21 +24,57 @@ void FixContractions(string file, string file_name);
 bool isWord(string word, int start_location, string file);
 bool isUpperCase(char c);
 void WordFrequency(string file);
+void CaesarShift(string file, int shift, bool direction);
+bool isLetter(char c);
 int main()
 {
-	string file = "", file_name;
-	int function;
-	bool file_exists;
+	string file = "", file_name = "";
+	int function, shift;
+	bool file_exists, file_loaded;
 	char keep_going = 0;
-	cout << "Plain+Simple String Manipulator v. 0.2\n";
+	cout << "Plain+Simple String Manipulator v. 0.3\n";
+	string line;
+	ifstream myfile ("file_name");
+	if (myfile.is_open()) {
+		file_loaded = 1;
+		while ( getline (myfile,line) ) {
+		     file_name = file_name + line;
+		}
+		myfile.close();
+	 }
+	if(file_loaded) {
+		cout << "Current file loaded is << " << file_name << " >> \n";
+		ifstream myfile (file_name.c_str());
+			if (myfile.is_open()) {
+				while ( getline (myfile,line) ) {
+				     file = file + line;
+				}
+				myfile.close();
+			 }
+	}
+
 	cout << "\t    Press enter\n";
 	cin.get();
 	do {
-	file_name = GetFileName();
-	file_exists = ReadFile(file_name, file);
-	if(file_exists) {
 		function = Menu();
 		switch(function) {
+		case -1: cout << "Enter text: ";
+				cin >> file;
+				cout << "Name the text: ";
+				cin >> file_name;
+//				ofstream textFile("text_file");
+//				if(textFile.is_open()) {
+//					textFile << file;
+//				}
+//				else
+//					cout << "Error saving text to file.\n";
+//				textFile.close();
+				break;
+		case 0: file_name = GetFileName();
+				file_exists = ReadFile(file_name, file);
+				if(!(file_exists))
+					cout << "Error: Invalid file entered.\n\n";
+				break;
 		case 1: CharacterCount(file);
 				break;
 		case 2: CharacterFrequency(file);
@@ -46,17 +83,9 @@ int main()
 				break;
 		case 4: LineCount(file_name);
 				break;
-		case 5: cout << "A new file will be created\n";
-				cout << "Continue? (y/n) ";
-				cin >> keep_going;
-				if(keep_going == 'y')
-					ForceUpperCase(file, file_name);
+		case 5: ForceUpperCase(file, file_name);
 				break;
-		case 6: cout << "A new file will be created\n";
-				cout << "Continue? (y/n) ";
-				cin >> keep_going;
-				if(keep_going == 'y')
-					ForceLowerCase(file, file_name);
+		case 6:	ForceLowerCase(file, file_name);
 				break;
 		case 7: CorrectCapitalization(file, file_name);
 				break;
@@ -64,10 +93,28 @@ int main()
 				break;
 		case 9: WordFrequency(file);
 				break;
-		}
+		case 10: cout << "Enter number of letters to shift by: ";
+				cin >> shift;
+				CaesarShift(file, shift, 1);
+				break;
+		case 11: cout << "Enter original shift: ";
+				cin >> shift;
+				shift = shift * -1;
+				CaesarShift(file, shift, -1);
+				break;
 	}
 	cout << "\nRun again? (y/n) ";
 	cin >> keep_going;
+	if(keep_going != 'y') {
+		ofstream newFile("file_name");
+		    if(newFile.is_open()) {
+		        newFile << file_name;
+		    }
+		    else {
+		       cout << "Error saving file name\n";
+		    }
+		    newFile.close();
+	}
 	}while (keep_going == 'y');
 
 	return 0;
@@ -100,6 +147,8 @@ int Menu() {
 	int choice;
 	cout << "\nAvailable Functions\n";
 	cout << "----------------------------------------\n";
+	cout << "-1. Manually enter text\n";
+	cout << "0. Choose File\n";
 	cout << "1. Character Count\n";
 	cout << "2. Character Frequency\n";
 	cout << "3. Word Count\n";
@@ -109,7 +158,10 @@ int Menu() {
 	cout << "7. Correct capitalization\n";
 	cout << "8. Fix Contractions\n";
 	cout << "9. Word Frequency\n";
-	/// help function
+	cout << "10. Encode Caesar Shift\n";
+	cout << "11. Decode Caesar Shift\n";
+	// help function
+	// options function : create new file? overwrite existing file?
 	cout << "----------------------------------------\n";
 	cout << "Enter choice: ";
 	cin >> choice;
@@ -241,9 +293,9 @@ string NewFile(string file_name, string suffix, string file) {
   if (myfile.is_open())
   {
     myfile << file;
-    myfile.close();
   }
   else cout << "Unable to open file";
+  myfile.close();
 	return new_file_name;
 }
 void ForceLowerCase(string file, string file_name) {
@@ -262,6 +314,8 @@ void ForceLowerCase(string file, string file_name) {
 	cout << "New file saved as << " << new_file_name << " >>\n";
 }
 void CorrectCapitalization(string file, string file_name) { // implement arrays, like with FixContractions
+	if(isLowerCase(file[0]))
+		file[0] = file[0] - 32;
 	for(int i = 0; i < file.size(); i++) {
 		if(file[i] == 'i' && file[i - 1] == ' ') { /// won't work if file[0] needs to be capitalized
 			if(file[i + 1] == ' ')
@@ -271,8 +325,9 @@ void CorrectCapitalization(string file, string file_name) { // implement arrays,
 					file[i] = 'I';
 			}
 		}
-		else if(isLowerCase(file[i]) == 1 && file[i - 1] == ' ' && file[i - 2] == '.')
-			file[i] = file[i] - 32;
+		else if(isLowerCase(file[i]) == 1 && file[i - 1] == ' ')
+			if(file[i - 2] == '.' || file[i - 2] == '!' || file[i - 2] == '?')
+				file[i] = file[i] - 32;
 	}
 	cout << "Edited text: \n\n";
 	cout << file;
@@ -324,38 +379,74 @@ bool isUpperCase(char c) {
 void WordFrequency(string file) {
 	vector<string> words; /* empty vector */
 	vector<int> frequencies; /* empty vector */
-	int first_word, end_location;
+	int end_location;
 	string word = "", compare;
-	bool is_word;
-	first_word = file.find(" ");
+	int first_word = file.find(" ");
 	for(int i = 0; i < first_word; i++)
 		word = word + file[i];
+///	cout << word << endl;
 	words.push_back(word);
+///	cout << words[0] << endl;;
 	frequencies.push_back(1);
+///	cout << frequencies[0] << endl;
 	for(int i = first_word; i < file.size(); i++) {
-		if(file[i] != ' ')
-			is_word = 1;
-		else
-			is_word = 0;
-		if(is_word == 1) {
-			word = ""; /* initialize word each time */
-			for(int j = i; i < file.size(); i++) { /* scan for the next space */
+		cout << "hello " << i << endl;
+			word = ""; /* reinitialize 'word' each time */
+			for(int j = i; j < file.size(); j++) { /* scan for the next space */
 				if(file[j] == 32) {
 					end_location = j;
+					cout << "end_location = " << end_location << endl;
+					i = end_location;
 					j = file.size();
 				}
 				else
 					word = word + file[j];
-			}
-			for(int k = 0; k < words.size(); k++) {
+			for(int k = 0; k < words.size(); k++) { /* scan vector of words, look for a match */
 				compare = words[k];
-				if(word == compare)
+				if(word == compare) {
+					cout << "<< " << word << " >> added.\n";
+					cout << "words[" << k << "] = " << words[k] << endl;
 					frequencies[k]++;
+					cout << "frequencies[" << k << "] = " << frequencies[k] << endl;
+					k = words.size();
+				}
 				else {
-					words.push_back(word);
+					words.push_back(word); /* if no match, add this word to the list */
 					frequencies.push_back(1);
 				}
 			}
 		}
 	}
+	for(int i = 0; i < words.size(); i++) {
+		cout << words[i] << "    |    " << frequencies[i] << endl;
+	}
+}
+void CaesarShift(string file, int shift, bool direction) {
+	char letters [52] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+	int location = 0;
+	if(direction == 1) {
+			cout << "Encoded Text: \n\n";
+	}
+	else {
+		cout << "Decoded Text: \n\n";
+	}
+	for(int i = 0; i < file.size(); i++) {
+		if(isLetter(file[i])) {
+			for(int j = 0; j < 52; j++) {
+				if(file[i] == letters[j]) {
+					location = (j + shift) % 52;
+					if(shift < 0)
+						location = location * -1;
+					j = 52;
+				}
+			}
+			file[i] = letters[location];
+		}
+	}
+	cout << file;
+}
+bool isLetter(char c) {
+	if((c >= 65 && c <= 90) || (c >= 97 && c <= 122))
+		return 1;
+	return 0;
 }
