@@ -16,7 +16,7 @@ int Digits(int n);
 void WordCount(string file);
 void LineCount(string file_name);
 void ForceUpperCase(string file, string file_name);
-string NewFile(string file_name, string suffix, string file);
+void NewFile(string file_name, string suffix, string file);
 void ForceLowerCase(string file, string file_name);
 void CorrectCapitalization(string file, string file_name);
 bool isLowerCase(char c);
@@ -26,12 +26,15 @@ bool isUpperCase(char c);
 void WordFrequency(string file);
 void CaesarShift(string file, int shift, bool direction);
 bool isLetter(char c);
+void Accents(string file);
+void Options(vector<bool> &options);
 int main()
 {
 	string file = "", file_name = "";
 	int function, shift;
 	bool file_exists, file_loaded;
 	char keep_going = 0;
+	vector<bool> options[1] = {0}; /// real problems with this... doesn't seem to work with an array or with a vector
 	cout << "Plain+Simple String Manipulator v. 0.3\n";
 	string line;
 	ifstream myfile ("file_name");
@@ -102,6 +105,10 @@ int main()
 				shift = shift * -1;
 				CaesarShift(file, shift, -1);
 				break;
+		case 12: Accents(file);
+				break;
+		case 13: Options(options);
+				break;
 	}
 	cout << "\nRun again? (y/n) ";
 	cin >> keep_going;
@@ -145,7 +152,8 @@ bool ReadFile(string file_name, string &file) {
 }
 int Menu() {
 	int choice;
-	cout << "\nAvailable Functions\n";
+	cout << "\nAvailable Functions\n"; /// these will most likely be arranged
+										/// and changed later on
 	cout << "----------------------------------------\n";
 	cout << "-1. Manually enter text\n";
 	cout << "0. Choose File\n";
@@ -160,8 +168,11 @@ int Menu() {
 	cout << "9. Word Frequency\n";
 	cout << "10. Encode Caesar Shift\n";
 	cout << "11. Decode Caesar Shift\n";
-	// help function
-	// options function : create new file? overwrite existing file?
+	cout << "12. Use Accents\n";
+	cout << "13. Options\n";
+	cout << "14. Help\n"; /// hasn't been written yet
+	/// help function
+	/// options function : create new file? overwrite existing file?
 	cout << "----------------------------------------\n";
 	cout << "Enter choice: ";
 	cin >> choice;
@@ -282,21 +293,21 @@ void ForceUpperCase(string file, string file_name) {
 	}
 	cout << "Edited text: \n";
 	cout << file_edited;
-	string suffix = "uppercase";
-	string new_file_name = NewFile(file_name, suffix, file_edited);
-	cout << "New file saved as << " << new_file_name << " >>\n";
+	if(options[0] == 1)
+		NewFile(file_name, "uppercase", file_edited);
+
 }
-string NewFile(string file_name, string suffix, string file) {
+void NewFile(string file_name, string suffix, string file) {
 	/* currently assuming file names don't have an ending */
 	string new_file_name = file_name + "_" + suffix;
 	ofstream myfile (new_file_name.c_str());
   if (myfile.is_open())
   {
     myfile << file;
+    cout << "New file saved as << " << new_file_name << " >>\n";
   }
-  else cout << "Unable to open file";
+  else cout << "Error creating new file";
   myfile.close();
-	return new_file_name;
 }
 void ForceLowerCase(string file, string file_name) {
 	int char_value;
@@ -310,8 +321,8 @@ void ForceLowerCase(string file, string file_name) {
 	cout << "Edited text: \n";
 	cout << file_edited;
 	string suffix = "lowercase";
-	string new_file_name = NewFile(file_name, suffix, file_edited);
-	cout << "New file saved as << " << new_file_name << " >>\n";
+	if(options[0] == 1)
+		NewFile(file_name, "lowercase", file_edited);
 }
 void CorrectCapitalization(string file, string file_name) { // implement arrays, like with FixContractions
 	if(isLowerCase(file[0]))
@@ -331,6 +342,8 @@ void CorrectCapitalization(string file, string file_name) { // implement arrays,
 	}
 	cout << "Edited text: \n\n";
 	cout << file;
+	if(options[0] == 1)
+		NewFile(file_name, "capitalized", file_edited);
 }
 bool isLowerCase(char c) {
 	bool lower = 1;
@@ -361,6 +374,8 @@ void FixContractions(string file, string file_name) { // buggy
 		}
 	cout << "Edited text: \n\n";
 	cout << file_edited;
+	if(options[0] == 1)
+		NewFile(file_name, "uncontracted", file_edited);
 
 }
 bool isWord(string word, int start_location, string file) { /// possible problems
@@ -444,9 +459,35 @@ void CaesarShift(string file, int shift, bool direction) {
 		}
 	}
 	cout << file;
+	if(options[0] == 1 && direction > 0)
+		NewFile(file_name, "encoded", file);
+	else if(options[0] == 1 && direction < 0)
+		NewFile(file_name, "decoded", file);
 }
 bool isLetter(char c) {
 	if((c >= 65 && c <= 90) || (c >= 97 && c <= 122))
 		return 1;
 	return 0;
+}
+void Accents(string file) { /// in Java/Android we would *REALLY* want either buttons or event listeners to write accented chars
+	cout << "^a -> " << char(131) << endl; /// perhaps two separate functions: one in which you can read a file and convert
+	cout << ":a -> " << char(132) << endl; /// to accents, one where you can type accents live
+	cout << "'a -> " << char(133) << endl; // wrong ascii values - need to find correct table
+}
+void Options(vector<bool> &options) {
+	cout << "Options:\n";
+	cout << "------------------------------------------------\n";
+	cout << "1. Write edited text to new file.........";
+		if(options[0])
+			cout << "TRUE\n";
+		else
+			cout << "FALSE\n";
+	cout << "------------------------------------------------\n";
+	cout << "Enter the number of the option you would like to change: ";
+	int option_num = cin.get();
+	if(options[option_num])
+		options[option_num] = 0;
+	else
+		options[option_num] = 1;
+	cout << "Option " << option_num << " set to << " << options[option_num] << " >>\n";
 }
