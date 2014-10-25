@@ -8,6 +8,7 @@ using namespace std;
 
 
 string GetFileName();
+void GetText(string &file, string &file_name);
 bool ReadFile(string file_name, string &file);
 int Menu();
 void CharacterCount(string file);
@@ -15,26 +16,28 @@ void CharacterFrequency(string file);
 int Digits(int n);
 void WordCount(string file);
 void LineCount(string file_name);
-void ForceUpperCase(string file, string file_name);
+void ForceUpperCase(string file, string file_name, int parameters [1]);
 void NewFile(string file_name, string suffix, string file);
-void ForceLowerCase(string file, string file_name);
-void CorrectCapitalization(string file, string file_name);
+void ForceLowerCase(string file, string file_name, int parameters [1]);
+void CorrectCapitalization(string file, string file_name, int parameters [1]);
 bool isLowerCase(char c);
-void FixContractions(string file, string file_name);
+void FixContractions(string file, string file_name, int parameters [1]);
 bool isWord(string word, int start_location, string file);
 bool isUpperCase(char c);
 void WordFrequency(string file);
-void CaesarShift(string file, int shift, bool direction);
+void CaesarShift(string file, string file_name, int shift, bool direction, int parameters [1]);
 bool isLetter(char c);
 void Accents(string file);
-void Options(vector<bool> &options);
+void Settings(int parameters [1]);
+int StringToInt(string s);
+string IntToString(int b);
 int main()
 {
 	string file = "", file_name = "";
 	int function, shift;
 	bool file_exists, file_loaded;
 	char keep_going = 0;
-	vector<bool> options[1] = {0}; /// real problems with this... doesn't seem to work with an array or with a vector
+	int parameters [1];
 	cout << "Plain+Simple String Manipulator v. 0.3\n";
 	string line;
 	ifstream myfile ("file_name");
@@ -61,17 +64,7 @@ int main()
 	do {
 		function = Menu();
 		switch(function) {
-		case -1: cout << "Enter text: ";
-				cin >> file;
-				cout << "Name the text: ";
-				cin >> file_name;
-//				ofstream textFile("text_file");
-//				if(textFile.is_open()) {
-//					textFile << file;
-//				}
-//				else
-//					cout << "Error saving text to file.\n";
-//				textFile.close();
+		case -1: GetText(file, file_name);
 				break;
 		case 0: file_name = GetFileName();
 				file_exists = ReadFile(file_name, file);
@@ -86,28 +79,28 @@ int main()
 				break;
 		case 4: LineCount(file_name);
 				break;
-		case 5: ForceUpperCase(file, file_name);
+		case 5: ForceUpperCase(file, file_name, parameters);
 				break;
-		case 6:	ForceLowerCase(file, file_name);
+		case 6:	ForceLowerCase(file, file_name, parameters);
 				break;
-		case 7: CorrectCapitalization(file, file_name);
+		case 7: CorrectCapitalization(file, file_name, parameters);
 				break;
-		case 8: FixContractions(file, file_name);
+		case 8: FixContractions(file, file_name, parameters);
 				break;
 		case 9: WordFrequency(file);
 				break;
 		case 10: cout << "Enter number of letters to shift by: ";
 				cin >> shift;
-				CaesarShift(file, shift, 1);
+				CaesarShift(file, file_name, shift, 1, parameters);
 				break;
 		case 11: cout << "Enter original shift: ";
 				cin >> shift;
 				shift = shift * -1;
-				CaesarShift(file, shift, -1);
+				CaesarShift(file, file_name, shift, -1, parameters);
 				break;
 		case 12: Accents(file);
 				break;
-		case 13: Options(options);
+		case 13: Settings(parameters);
 				break;
 	}
 	cout << "\nRun again? (y/n) ";
@@ -133,6 +126,32 @@ string GetFileName() /// possible additions: makes sure file is in the right loc
 	cout << "Enter file name: ";
 	cin >> file_name;
 	return file_name;
+}
+void GetText(string &file, string &file_name) {
+	char answer;
+	cout << "Enter text: ";
+	getline(cin, file);
+	getline(cin, file); // we need a second one because the first one is automatically ignored
+	cout << "Write text to file? (y/n) ";
+	cin >> answer;
+	if(answer == 'y') {
+		cout << "Enter name of file to be created: ";
+		cin >> file_name;
+		ofstream new_file(file_name.c_str());
+			if(new_file.is_open())
+				new_file << file;
+			else
+				cout << "Unable to open file";
+	}
+	else {
+		ofstream temp_text ("stringmanipulator_text");
+	  if (temp_text.is_open())
+	  {
+	    temp_text << file;
+	    file_name = "stringmanipulator_text";
+	  }
+	  else cout << "Unable to open file";
+	}
 }
 bool ReadFile(string file_name, string &file) {
 	bool file_exists = 1;
@@ -282,7 +301,7 @@ void LineCount(string file_name) {
 	  }
 	  cout << "File has " << line_counter << " lines\n";
 }
-void ForceUpperCase(string file, string file_name) {
+void ForceUpperCase(string file, string file_name, int parameters [1]) {
 	int char_value;
 	string file_edited = "";
 	for(int i = 0; i < file.size(); i++) {
@@ -293,7 +312,7 @@ void ForceUpperCase(string file, string file_name) {
 	}
 	cout << "Edited text: \n";
 	cout << file_edited;
-	if(options[0] == 1)
+	if(parameters[0] == 1)
 		NewFile(file_name, "uppercase", file_edited);
 
 }
@@ -309,7 +328,7 @@ void NewFile(string file_name, string suffix, string file) {
   else cout << "Error creating new file";
   myfile.close();
 }
-void ForceLowerCase(string file, string file_name) {
+void ForceLowerCase(string file, string file_name, int parameters [1]) {
 	int char_value;
 	string file_edited = ""; /// new string for file_edited is not necessary
 	for(int i = 0; i < file.size(); i++) {
@@ -320,11 +339,10 @@ void ForceLowerCase(string file, string file_name) {
 	}
 	cout << "Edited text: \n";
 	cout << file_edited;
-	string suffix = "lowercase";
-	if(options[0] == 1)
+	if(parameters[0] == 1)
 		NewFile(file_name, "lowercase", file_edited);
 }
-void CorrectCapitalization(string file, string file_name) { // implement arrays, like with FixContractions
+void CorrectCapitalization(string file, string file_name, int parameters [1]) { // implement arrays, like with FixContractions
 	if(isLowerCase(file[0]))
 		file[0] = file[0] - 32;
 	for(int i = 0; i < file.size(); i++) {
@@ -342,8 +360,8 @@ void CorrectCapitalization(string file, string file_name) { // implement arrays,
 	}
 	cout << "Edited text: \n\n";
 	cout << file;
-	if(options[0] == 1)
-		NewFile(file_name, "capitalized", file_edited);
+	if(parameters[0] == 1)
+		NewFile(file_name, "capitalized", file);
 }
 bool isLowerCase(char c) {
 	bool lower = 1;
@@ -351,7 +369,7 @@ bool isLowerCase(char c) {
 			lower = 0;
 	return lower;
 }
-void FixContractions(string file, string file_name) { // buggy
+void FixContractions(string file, string file_name, int parameters [1]) { // buggy
 	string file_edited, c, file_new = "";
 	string contractions [12] = {"aren't","can't","couldn't","didn't","doesn't","don't","handn't","hasn't","haven't","he'd","he'll","he's"};
 	string contracted [12] = {"are not","cannot","could not","did not","does not","do not","had not","has not", "have not", "he would", "he will", "he is"};
@@ -374,7 +392,7 @@ void FixContractions(string file, string file_name) { // buggy
 		}
 	cout << "Edited text: \n\n";
 	cout << file_edited;
-	if(options[0] == 1)
+	if(parameters[0] == 1)
 		NewFile(file_name, "uncontracted", file_edited);
 
 }
@@ -436,7 +454,7 @@ void WordFrequency(string file) {
 		cout << words[i] << "    |    " << frequencies[i] << endl;
 	}
 }
-void CaesarShift(string file, int shift, bool direction) {
+void CaesarShift(string file, string file_name, int shift, bool direction, int parameters [1]) {
 	char letters [52] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 	int location = 0;
 	if(direction == 1) {
@@ -459,9 +477,9 @@ void CaesarShift(string file, int shift, bool direction) {
 		}
 	}
 	cout << file;
-	if(options[0] == 1 && direction > 0)
+	if(parameters[0] == 1 && direction > 0)
 		NewFile(file_name, "encoded", file);
-	else if(options[0] == 1 && direction < 0)
+	else if(parameters[0] == 1 && direction < 0)
 		NewFile(file_name, "decoded", file);
 }
 bool isLetter(char c) {
@@ -474,20 +492,71 @@ void Accents(string file) { /// in Java/Android we would *REALLY* want either bu
 	cout << ":a -> " << char(132) << endl; /// to accents, one where you can type accents live
 	cout << "'a -> " << char(133) << endl; // wrong ascii values - need to find correct table
 }
-void Options(vector<bool> &options) {
-	cout << "Options:\n";
+void Settings(int parameters [1]) {
+	string line, string_parameters = "";
+	int parameter_num;
+	ifstream file_parameters ("stringmanipulator_parameters");
+		if (file_parameters.is_open()) {
+			while ( getline (file_parameters,line) ) {
+			     for(int i = 0; i < line.size(); i++) {
+			    	 parameters[i] = int(line[i]) - 48;
+			    	 cout << "parameters[" << i << "] = " << parameters[i] << endl;
+			     }
+			}
+			file_parameters.close();
+		 }
+		else {
+			parameters[0] = 1;
+		}
+	cout << "Settings:\n";
 	cout << "------------------------------------------------\n";
 	cout << "1. Write edited text to new file.........";
-		if(options[0])
+		if(parameters[0] == 1)
 			cout << "TRUE\n";
 		else
 			cout << "FALSE\n";
 	cout << "------------------------------------------------\n";
 	cout << "Enter the number of the option you would like to change: ";
-	int option_num = cin.get();
-	if(options[option_num])
-		options[option_num] = 0;
+	cin >> parameter_num;
+	cout << "0. " << parameters[parameter_num] << endl;
+	if(parameters[parameter_num] = 1)
+		parameters[parameter_num] = 0;
 	else
-		options[option_num] = 1;
-	cout << "Option " << option_num << " set to << " << options[option_num] << " >>\n";
+		parameters[parameter_num] = 1;
+	cout << "1." << parameters[parameter_num] << endl;
+	cout << "Option " << parameter_num << " set to << ";
+	if(parameters[parameter_num] == 1) {
+		cout << "TRUE";
+	}
+	else
+		cout << "FALSE";
+	cout << "2. " << parameters[parameter_num] << endl;
+	cout <<  " >>\n";
+	char c;
+	for(int i = 0; i < 1; i++) {
+		if(parameters[i] == 1)
+			c = '1';
+		else
+			c = '0';
+		string_parameters = string_parameters + c; /// for some reason I just CANT get this to work. It's stuck on TRUE
+		cout << "3. " << string_parameters << endl;
+	}
+	cout << "4." << string_parameters << endl;
+	ofstream parameters_file("stringmanipulator_parameters");
+			    if(parameters_file.is_open()) {
+			        parameters_file << string_parameters;
+			    }
+			    parameters_file.close();
+}
+int StringToInt(string s) {
+	int num;
+	for(int i = 0; i < s.size(); i++)
+		num = num * 10 + (s[i] - '0');
+	return num;
+}
+string IntToString(int b) {
+	if(b == 0)
+		return "0";
+	else
+		return "1";
 }
