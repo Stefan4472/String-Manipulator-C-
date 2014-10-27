@@ -410,49 +410,37 @@ bool isUpperCase(char c) {
 	return upper;
 }
 void WordFrequency(string file) {
-	vector<string> words; /* empty vector */
-	vector<int> frequencies; /* empty vector */
+	vector<string> words; /* empty vector to hold words found*/
+	vector<int> frequencies; /* empty vector to record frequencies of each word*/
 	int end_location;
 	string word = "", compare;
 	int first_word = file.find(" ");
 	for(int i = 0; i < first_word; i++)
 		word = word + file[i];
-///	cout << word << endl;
 	words.push_back(word);
-///	cout << words[0] << endl;;
 	frequencies.push_back(1);
-///	cout << frequencies[0] << endl;
-	for(int i = first_word; i < file.size(); i++) {
-		cout << "hello " << i << endl;
-			word = ""; /* reinitialize 'word' each time */
-			for(int j = i; j < file.size(); j++) { /* scan for the next space */
-				if(file[j] == 32) {
-					end_location = j;
-					cout << "end_location = " << end_location << endl;
-					i = end_location;
-					j = file.size();
-				}
-				else
-					word = word + file[j];
-			for(int k = 0; k < words.size(); k++) { /* scan vector of words, look for a match */
+	word = "";
+    for(int i = first_word; i < file.size(); i++) { /* scan rest of file */
+			if(file[i] != 32)
+				word = word + file[i]; /* build word */
+			else if(file[i] == 32 || i == (file.size() - 1)){ /* hit a space or end of file - word is "over" */
+				cout << "word: " << word << endl;
+				for(int k = 0; k < words.size(); k++) { /* scan vector of words, look for a match */
 				compare = words[k];
-				if(word == compare) {
-					cout << "<< " << word << " >> added.\n";
-					cout << "words[" << k << "] = " << words[k] << endl;
+				if(word == compare) { /* word matches */
 					frequencies[k]++;
-					cout << "frequencies[" << k << "] = " << frequencies[k] << endl;
 					k = words.size();
 				}
-				else {
+				else if(word != compare && k == words.size() - 1) { /* vector has been scanned, no match found */
 					words.push_back(word); /* if no match, add this word to the list */
-					frequencies.push_back(1);
+					frequencies.push_back(1); /* add 1 to corresponding member of "frequencies" vector to keep count */
 				}
 			}
+			word = ""; /* reinitialize 'word' */
 		}
 	}
-	for(int i = 0; i < words.size(); i++) {
+	for(int i = 0; i < words.size(); i++)
 		cout << words[i] << "    |    " << frequencies[i] << endl;
-	}
 }
 void CaesarShift(string file, string file_name, int shift, bool direction, int parameters [1]) {
 	char letters [52] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
@@ -468,8 +456,6 @@ void CaesarShift(string file, string file_name, int shift, bool direction, int p
 			for(int j = 0; j < 52; j++) {
 				if(file[i] == letters[j]) {
 					location = (j + shift) % 52;
-					if(shift < 0)
-						location = location * -1;
 					j = 52;
 				}
 			}
@@ -493,19 +479,24 @@ void Accents(string file) { /// in Java/Android we would *REALLY* want either bu
 	cout << "'a -> " << char(133) << endl; // wrong ascii values - need to find correct table
 }
 void Settings(int parameters [1]) {
-	string line, string_parameters = "";
+	string line;
 	int parameter_num;
 	ifstream file_parameters ("stringmanipulator_parameters");
 		if (file_parameters.is_open()) {
 			while ( getline (file_parameters,line) ) {
 			     for(int i = 0; i < line.size(); i++) {
 			    	 parameters[i] = int(line[i]) - 48;
-			    	 cout << "parameters[" << i << "] = " << parameters[i] << endl;
 			     }
 			}
 			file_parameters.close();
 		 }
-		else {
+		else { /* "stringmanipulator_parameters" does not exist - write a new file with default values */
+			ofstream file_parameters ("stringmanipulator_parameters");
+			  if (file_parameters.is_open())
+			  {
+			    file_parameters << "1";
+			    file_parameters.close();
+			  }
 			parameters[0] = 1;
 		}
 	cout << "Settings:\n";
@@ -518,30 +509,28 @@ void Settings(int parameters [1]) {
 	cout << "------------------------------------------------\n";
 	cout << "Enter the number of the option you would like to change: ";
 	cin >> parameter_num;
-	cout << "0. " << parameters[parameter_num] << endl;
+	parameter_num--; /* subtract 1 because arrays start from zero!!!*/
 	if(parameters[parameter_num] = 1)
 		parameters[parameter_num] = 0;
 	else
 		parameters[parameter_num] = 1;
-	cout << "1." << parameters[parameter_num] << endl;
 	cout << "Option " << parameter_num << " set to << ";
 	if(parameters[parameter_num] == 1) {
 		cout << "TRUE";
 	}
 	else
 		cout << "FALSE";
-	cout << "2. " << parameters[parameter_num] << endl;
 	cout <<  " >>\n";
+	string string_parameters = "";
 	char c;
 	for(int i = 0; i < 1; i++) {
 		if(parameters[i] == 1)
 			c = '1';
 		else
 			c = '0';
+		cout << "c = " << c << endl;
 		string_parameters = string_parameters + c; /// for some reason I just CANT get this to work. It's stuck on TRUE
-		cout << "3. " << string_parameters << endl;
 	}
-	cout << "4." << string_parameters << endl;
 	ofstream parameters_file("stringmanipulator_parameters");
 			    if(parameters_file.is_open()) {
 			        parameters_file << string_parameters;
