@@ -31,38 +31,29 @@ void Accents(string file);
 void Settings(int parameters [1]);
 int StringToInt(string s);
 string IntToString(int b);
+void LoadParameters(int parameters [1]);
+bool LoadFileName(string &file_name);
+void LoadFile(string file_name, string &file);
 int main()
 {
 	string file = "", file_name = "";
-	int function, shift;
-	bool file_exists, file_loaded;
+	int shift;
 	char keep_going = 0;
+	bool file_exists = 0;
 	int parameters [1];
 	cout << "Plain+Simple String Manipulator v. 0.3\n";
 	string line;
-	ifstream myfile ("file_name");
-	if (myfile.is_open()) {
-		file_loaded = 1;
-		while ( getline (myfile,line) ) {
-		     file_name = file_name + line;
-		}
-		myfile.close();
-	 }
+	bool file_loaded = LoadFileName(file_name);
 	if(file_loaded) {
 		cout << "Current file loaded is << " << file_name << " >> \n";
-		ifstream myfile (file_name.c_str());
-			if (myfile.is_open()) {
-				while ( getline (myfile,line) ) {
-				     file = file + line;
-				}
-				myfile.close();
-			 }
+		LoadFile(file_name, file);
 	}
+	LoadParameters(parameters);
 
 	cout << "\t    Press enter\n";
 	cin.get();
 	do {
-		function = Menu();
+		int function = Menu();
 		switch(function) {
 		case -1: GetText(file, file_name);
 				break;
@@ -342,7 +333,31 @@ void ForceLowerCase(string file, string file_name, int parameters [1]) {
 		NewFile(file_name, "lowercase", file_edited);
 }
 void CorrectCapitalization(string file, string file_name, int parameters [1]) { // implement arrays, like with FixContractions
-	if(isLowerCase(file[0]))
+	string errors [5] = {" i "," i'm "," i'll "," i've "," i'd "};
+	string fixes [5] = {" I "," I'm "," I'll "," I've "," I'd "};
+	string file_edited = "";
+	if(isLowerCase(file[0] == 1)) {
+		int char_value = int(file[0]) - 32;
+		file_edited = file_edited + char(char_value);
+	}
+	for(int i = 1; i < file.size(); i++) {
+		if(isLowerCase(file[i]) == 1 && file[i - 1] == ' ') {
+					if(file[i - 2] == '.' || file[i - 2] == '!' || file[i - 2] == '?')
+						file_edited[i] = file[i] - 32;
+			}
+		for(int j = 0; j < 5; j++) {
+			if(isWord(errors[j], i, file)) {
+				file_edited = file_edited + fixes[j];
+				j = 5;
+					//i = i + errors[j].size();
+			}
+			else if(j == 4)
+				file_edited = file_edited + file[i];
+			}
+		}
+	cout << "Edited text: \n\n";
+	cout << file_edited;
+/*	if(isLowerCase(file[0]))
 		file[0] = file[0] - 32;
 	for(int i = 0; i < file.size(); i++) {
 		if(file[i] == 'i' && file[i - 1] == ' ') { /// won't work if file[0] needs to be capitalized
@@ -361,7 +376,7 @@ void CorrectCapitalization(string file, string file_name, int parameters [1]) { 
 	cout << file;
 	if(parameters[0] == 1)
 		NewFile(file_name, "capitalized", file);
-}
+*/}
 bool isLowerCase(char c) {
 	bool lower = 1;
 		if(int(c) >= 65 && int(c) <= 90)
@@ -375,12 +390,7 @@ void FixContractions(string file, string file_name, int parameters [1]) { // bug
 	for(int i = 0; i < file.size(); i++) {
 		for(int j = 0; j < 12; j++) {
 			c = contractions[j];
-			///cout << "contractions [" << j << "] = " << c << endl;;
-			///b = isWord(c, i, file);
-			///if(b)
-				///cout << "isWord (" << c << "," << i << ") = " <<  b << endl;
 			if(isWord(c, i, file)) {
-				///cout << "isWord is true\n";
 				file_edited = file_edited + contracted[j];
 				j = 12;
 				i = i + c.size() - 1;
@@ -395,10 +405,12 @@ void FixContractions(string file, string file_name, int parameters [1]) { // bug
 		NewFile(file_name, "uncontracted", file_edited);
 
 }
-bool isWord(string word, int start_location, string file) { /// possible problems
+bool isWord(string word, int start_location, string file) { // change to "isString"
+	int counter = 0;
 	for(int i = start_location; i < start_location + word.size(); i++) {
-		if(file[i] != word[i])
+		if(file[i] != word[counter])
 			return 0;
+		counter++;
 	}
 	return 1;
 }
@@ -480,24 +492,7 @@ void Accents(string file) { /// in Java/Android we would *REALLY* want either bu
 void Settings(int parameters [1]) {
 	string line;
 	int parameter_num;
-	ifstream file_parameters ("stringmanipulator_parameters");
-		if (file_parameters.is_open()) {
-			while ( getline (file_parameters,line) ) {
-			     for(int i = 0; i < line.size(); i++) {
-			    	 parameters[i] = int(line[i]) - 48;
-			     }
-			}
-			file_parameters.close();
-		 }
-		else { /* "stringmanipulator_parameters" does not exist - write a new file with default values */
-			ofstream file_parameters ("stringmanipulator_parameters");
-			  if (file_parameters.is_open())
-			  {
-			    file_parameters << "1";
-			    file_parameters.close();
-			  }
-			parameters[0] = 1;
-		}
+	LoadParameters(parameters);
 	cout << "Settings:\n";
 	cout << "------------------------------------------------\n";
 	cout << "1. Write edited text to new file........."; // add: overwrite file with edited text
@@ -511,14 +506,15 @@ void Settings(int parameters [1]) {
 	cout << "Enter the number of the option you would like to change: ";
 	cin >> parameter_num;
 	parameter_num--; /* subtract 1 because arrays start from zero!!!*/
-	if(parameters[parameter_num] = 1)
+	// debugging: cout << "1. parameters[" << parameter_num << "] = " << parameters[parameter_num] << endl;
+	if(parameters[parameter_num] == 1)
 		parameters[parameter_num] = 0;
 	else
 		parameters[parameter_num] = 1;
-	cout << "Option " << parameter_num << " set to << ";
-	if(parameters[parameter_num] == 1) {
+	// debugging: cout << "2. parameters[" << parameter_num << "] = " << parameters[parameter_num] << endl;
+	cout << "Option " << parameter_num + 1 << " set to << ";
+	if(parameters[parameter_num] == 1)
 		cout << "TRUE";
-	}
 	else
 		cout << "FALSE";
 	cout <<  " >>\n";
@@ -530,7 +526,7 @@ void Settings(int parameters [1]) {
 		else
 			c = '0';
 		cout << "c = " << c << endl;
-		string_parameters = string_parameters + c; /// for some reason I just CANT get this to work. It's stuck on TRUE
+		string_parameters = string_parameters + c;
 	}
 	ofstream parameters_file("stringmanipulator_parameters");
 			    if(parameters_file.is_open()) {
@@ -549,4 +545,48 @@ string IntToString(int b) {
 		return "0";
 	else
 		return "1";
+}
+void LoadParameters(int parameters [1]) {
+	string line;
+	ifstream file_parameters ("stringmanipulator_parameters");
+		if (file_parameters.is_open()) {
+			while ( getline (file_parameters,line) ) {
+			     for(int i = 0; i < line.size(); i++) {
+			    	 parameters[i] = int(line[i]) - 48;
+			     }
+			}
+			file_parameters.close();
+		 }
+		else { /* "stringmanipulator_parameters" does not exist - write a new file with default values */
+			ofstream file_parameters ("stringmanipulator_parameters");
+			  if (file_parameters.is_open())
+			  {
+			    file_parameters << "1";
+			    file_parameters.close();
+			  }
+			parameters[0] = 1;
+		}
+}
+bool LoadFileName(string &file_name) {
+	bool file_loaded = 0;
+	string line;
+	ifstream myfile ("file_name");
+		if (myfile.is_open()) {
+			file_loaded = 1;
+			while ( getline (myfile,line) ) {
+			     file_name = file_name + line;
+			}
+			myfile.close();
+		 }
+		return file_loaded;
+}
+void LoadFile(string file_name, string &file) {
+	string line;
+	ifstream myfile (file_name.c_str());
+		if (myfile.is_open()) {
+			while ( getline (myfile,line) ) {
+			     file = file + line;
+			}
+			myfile.close();
+		 }
 }
