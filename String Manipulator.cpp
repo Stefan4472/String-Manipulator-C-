@@ -164,15 +164,16 @@ bool ReadFile(string file_name, string &file) {
 	    myfile.close();
 	  }
 	  else {
-		  cout << "Unable to open file";
+		  cout << "Error: Specified file does not exist\n";
+		  cout << "Please make sure the file is in the proper directory\n";
 		  file_exists = 0;
 	  }
 	return file_exists;
 }
 int Menu() {
 	int choice;
-	cout << "\nAvailable Functions\n"; /// these will most likely be arranged
-										/// and changed later on
+	cout << "\nAvailable Functions\n"; /// these will most likely be rearranged and changed later on
+	// add: quick fix, text analysis, change line spacing, insert " ", remove double commas/periods/etc.
 	cout << "----------------------------------------\n";
 	cout << "-1. Manually enter text\n";
 	cout << "0. Choose File\n";
@@ -190,8 +191,6 @@ int Menu() {
 	cout << "12. Use Accents\n";
 	cout << "13. Options\n";
 	cout << "14. Help\n"; /// hasn't been written yet
-	/// help function
-	/// options function : create new file? overwrite existing file?
 	cout << "----------------------------------------\n";
 	cout << "Enter choice: ";
 	cin >> choice;
@@ -501,7 +500,9 @@ void Settings(int parameters [1]) {
 		}
 	cout << "Settings:\n";
 	cout << "------------------------------------------------\n";
-	cout << "1. Write edited text to new file.........";
+	cout << "1. Write edited text to new file........."; // add: overwrite file with edited text
+							// add: configure "quick fix" settings
+							 // add: back to menu
 		if(parameters[0] == 1)
 			cout << "TRUE\n";
 		else
