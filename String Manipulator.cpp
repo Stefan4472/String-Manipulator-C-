@@ -16,38 +16,42 @@ void CharacterFrequency(string file);
 int Digits(int n);
 void WordCount(string file);
 void LineCount(string file_name);
-void ForceUpperCase(string file, string file_name, int parameters [1]);
+void ForceUpperCase(string file, string file_name, int parameters [2]);
 void NewFile(string file_name, string suffix, string file);
-void ForceLowerCase(string file, string file_name, int parameters [1]);
-void CorrectCapitalization(string file, string file_name, int parameters [1]);
+void ForceLowerCase(string file, string file_name, int parameters [2]);
+void CorrectCapitalization(string file, string file_name, int parameters [2]);
 bool isLowerCase(char c);
-void FixContractions(string file, string file_name, int parameters [1]);
+void FixContractions(string file, string file_name, int parameters [2]);
 bool isWord(string word, int start_location, string file);
 bool isUpperCase(char c);
 void WordFrequency(string file);
-void CaesarShift(string file, string file_name, int shift, bool direction, int parameters [1]);
+void CaesarShift(string file, string file_name, int shift, bool direction, int parameters [2]);
 bool isLetter(char c);
 void Accents(string file);
-void Settings(int parameters [1]);
+void Settings(int parameters [2]);
 int StringToInt(string s);
 string IntToString(int b);
-void LoadParameters(int parameters [1]);
+void LoadParameters(int parameters [2]);
 bool LoadFileName(string &file_name);
 void LoadFile(string file_name, string &file);
+void WriteFile(string file_name, string file);
 int main()
 {
 	string file = "", file_name = "";
 	int shift;
 	char keep_going = 0;
 	bool file_exists = 0;
-	int parameters [1];
-	cout << "Plain+Simple String Manipulator v. 0.3\n";
+	int parameters [2];
+	cout << "Plain+Simple String Manipulator v. 0.4\n";
 	string line;
 	bool file_loaded = LoadFileName(file_name);
-	if(file_loaded) {
+	if(file_loaded && file_name != "stringmanipulator_text") {
+
 		cout << "Current file loaded is << " << file_name << " >> \n";
 		LoadFile(file_name, file);
 	}
+	else
+		cout << "\t  No files loaded\n";
 	LoadParameters(parameters);
 
 	cout << "\t    Press enter\n";
@@ -55,6 +59,38 @@ int main()
 	do {
 		int function = Menu();
 		switch(function) {
+		case -3: cout << "Enter name of file to read: (enter 'DEFAULT' to read loaded file) ";
+				cin >> file_name;
+				if(file_name == "DEFAULT" && file_loaded)
+					cout << file;
+				else if(file_name == "DEFAULT" && file_loaded == 0)
+					cout << "Error: No file loaded\n\n";
+				else {
+					string read_file = "";
+					file_exists = ReadFile(file_name.c_str(), read_file);
+					if(!(file_exists))
+						cout << "Error: File not found\n\n";
+					else {
+						cout << read_file;
+					}
+				}
+				break;
+		case -2: file_exists = ReadFile("stringmanipulator_text", file);
+				if(!(file_exists))
+					cout << "Error: File not found.\n\n";
+				else {
+					cout << "File recovered: \n\n";
+					cout << file << endl << endl;
+					cout << "Save file? (y/n) ";
+					char choice;
+					cin >> choice;
+					if(choice == 'y') {
+						cout << "Enter name of file: ";
+						cin >> file_name;
+						WriteFile(file_name, file);
+					}
+				}
+				break;
 		case -1: GetText(file, file_name);
 				break;
 		case 0: file_name = GetFileName();
@@ -166,6 +202,8 @@ int Menu() {
 	cout << "\nAvailable Functions\n"; /// these will most likely be rearranged and changed later on
 	// add: quick fix, text analysis, change line spacing, insert " ", remove double commas/periods/etc.
 	cout << "----------------------------------------\n";
+	cout << "-3. Read file\n";
+	cout << "-2. Recover unsaved file\n";
 	cout << "-1. Manually enter text\n";
 	cout << "0. Choose File\n";
 	cout << "1. Character Count\n";
@@ -291,7 +329,7 @@ void LineCount(string file_name) {
 	  }
 	  cout << "File has " << line_counter << " lines\n";
 }
-void ForceUpperCase(string file, string file_name, int parameters [1]) {
+void ForceUpperCase(string file, string file_name, int parameters [2]) {
 	int char_value;
 	string file_edited = "";
 	for(int i = 0; i < file.size(); i++) {
@@ -304,6 +342,8 @@ void ForceUpperCase(string file, string file_name, int parameters [1]) {
 	cout << file_edited;
 	if(parameters[0] == 1)
 		NewFile(file_name, "uppercase", file_edited);
+	else if(parameters[1] == 1)
+		WriteFile(file_name, file_edited);
 
 }
 void NewFile(string file_name, string suffix, string file) {
@@ -318,7 +358,7 @@ void NewFile(string file_name, string suffix, string file) {
   else cout << "Error creating new file";
   myfile.close();
 }
-void ForceLowerCase(string file, string file_name, int parameters [1]) {
+void ForceLowerCase(string file, string file_name, int parameters [2]) {
 	int char_value;
 	string file_edited = ""; /// new string for file_edited is not necessary
 	for(int i = 0; i < file.size(); i++) {
@@ -331,8 +371,10 @@ void ForceLowerCase(string file, string file_name, int parameters [1]) {
 	cout << file_edited;
 	if(parameters[0] == 1)
 		NewFile(file_name, "lowercase", file_edited);
+	else if(parameters[1] == 1)
+			WriteFile(file_name, file_edited);
 }
-void CorrectCapitalization(string file, string file_name, int parameters [1]) { // implement arrays, like with FixContractions
+void CorrectCapitalization(string file, string file_name, int parameters [2]) { // implement arrays, like with FixContractions
 	string errors [5] = {" i "," i'm "," i'll "," i've "," i'd "};
 	string fixes [5] = {" I "," I'm "," I'll "," I've "," I'd "};
 	string file_edited = "";
@@ -383,7 +425,7 @@ bool isLowerCase(char c) {
 			lower = 0;
 	return lower;
 }
-void FixContractions(string file, string file_name, int parameters [1]) { // buggy
+void FixContractions(string file, string file_name, int parameters [2]) { // buggy
 	string file_edited, c, file_new = "";
 	string contractions [12] = {"aren't","can't","couldn't","didn't","doesn't","don't","handn't","hasn't","haven't","he'd","he'll","he's"};
 	string contracted [12] = {"are not","cannot","could not","did not","does not","do not","had not","has not", "have not", "he would", "he will", "he is"};
@@ -403,6 +445,8 @@ void FixContractions(string file, string file_name, int parameters [1]) { // bug
 	cout << file_edited;
 	if(parameters[0] == 1)
 		NewFile(file_name, "uncontracted", file_edited);
+	else if(parameters[1] == 1)
+			WriteFile(file_name, file_edited);
 
 }
 bool isWord(string word, int start_location, string file) { // change to "isString"
@@ -453,7 +497,7 @@ void WordFrequency(string file) {
 	for(int i = 0; i < words.size(); i++)
 		cout << words[i] << "    |    " << frequencies[i] << endl;
 }
-void CaesarShift(string file, string file_name, int shift, bool direction, int parameters [1]) {
+void CaesarShift(string file, string file_name, int shift, bool direction, int parameters [2]) {
 	char letters [52] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 	int location = 0;
 	if(direction == 1) {
@@ -478,6 +522,8 @@ void CaesarShift(string file, string file_name, int shift, bool direction, int p
 		NewFile(file_name, "encoded", file);
 	else if(parameters[0] == 1 && direction < 0)
 		NewFile(file_name, "decoded", file);
+	else if(parameters[1] == 1)
+			WriteFile(file_name, file);
 }
 bool isLetter(char c) {
 	if((c >= 65 && c <= 90) || (c >= 97 && c <= 122))
@@ -489,7 +535,7 @@ void Accents(string file) { /// in Java/Android we would *REALLY* want either bu
 	cout << ":a -> " << char(132) << endl; /// to accents, one where you can type accents live
 	cout << "'a -> " << char(133) << endl; // wrong ascii values - need to find correct table
 }
-void Settings(int parameters [1]) {
+void Settings(int parameters [2]) {
 	string line;
 	int parameter_num;
 	LoadParameters(parameters);
@@ -499,6 +545,11 @@ void Settings(int parameters [1]) {
 							// add: configure "quick fix" settings
 							 // add: back to menu
 		if(parameters[0] == 1)
+			cout << "TRUE\n";
+		else
+			cout << "FALSE\n";
+	cout << "2. Overwrite file with edited text.......";
+		if(parameters[1] == 1)
 			cout << "TRUE\n";
 		else
 			cout << "FALSE\n";
@@ -512,7 +563,7 @@ void Settings(int parameters [1]) {
 	else
 		parameters[parameter_num] = 1;
 	// debugging: cout << "2. parameters[" << parameter_num << "] = " << parameters[parameter_num] << endl;
-	cout << "Option " << parameter_num + 1 << " set to << ";
+	cout << "\nOption " << parameter_num + 1 << " set to << ";
 	if(parameters[parameter_num] == 1)
 		cout << "TRUE";
 	else
@@ -546,7 +597,7 @@ string IntToString(int b) {
 	else
 		return "1";
 }
-void LoadParameters(int parameters [1]) {
+void LoadParameters(int parameters [2]) {
 	string line;
 	ifstream file_parameters ("stringmanipulator_parameters");
 		if (file_parameters.is_open()) {
@@ -589,4 +640,12 @@ void LoadFile(string file_name, string &file) {
 			}
 			myfile.close();
 		 }
+}
+void WriteFile(string file_name, string file) {
+	ofstream file_parameters (file_name.c_str());
+		if (file_parameters.is_open())
+		  {
+		    file_parameters << file;
+		    file_parameters.close();
+		  }
 }
