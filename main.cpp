@@ -6,35 +6,50 @@
 
 using namespace std;
 
-
+/* Get name of file from which to read text */
 string GetFileName();
+/* User enters text manually */
 void GetText(string & file, string & file_name);
+/* Reads text from specified file */
 bool ReadFile(string file_name, string & file);
 int Menu();
 void CharacterCount(string file);
 void CharacterFrequency(string file);
+/* returns number of digits in a number */
 int Digits(int n);
 void WordCount(string file);
 void LineCount(string file_name);
 void ForceUpperCase(string file, string file_name, int parameters [2]);
+/* Writes a new file with text "file" using a given filename and suffix */
 void NewFile(string file_name, string suffix, string file);
 void ForceLowerCase(string file, string file_name, int parameters [2]);
 void CorrectCapitalization(string file, string file_name, int parameters [2]);
 bool isLowerCase(char c);
+/* Finds contractions and writes them out (e.g. can't -> cannot) */
 void FixContractions(string file, string file_name, int parameters [2]);
+/* looks at string "file" at start_location and returns true if it has found string word */
 bool isWord(string word, int start_location, string file);
 bool isUpperCase(char c);
 void WordFrequency(string file);
+/* Caesar shift cipher, direction > 0 encrypts, direction < 0 decrypts */
 void CaesarShift(string file, string file_name, int shift, bool direction,
                  int parameters [2]);
+/* returns "true" if c is a letter in the alphabet */
 bool isLetter(char c);
 void Accents(string file);
+/* settings function */
 void Settings(int parameters [2]);
+/* converts string to integer */
 int StringToInt(string s);
+/* converts integer to string */
 string IntToString(int b);
+/* loads settings from file */
 void LoadParameters(int parameters [2]);
+/* loads name of most recent file accessed */
 bool LoadFileName(string & file_name);
+/* loads file into string */
 void LoadFile(string file_name, string & file);
+/* writes file with name file_name and text file */
 void WriteFile(string file_name, string file);
 int main() {
   string file = "", file_name = "";
@@ -58,7 +73,7 @@ int main() {
   do {
     int function = Menu();
     switch (function) {
-      case -3:
+      case -3: /// negative because I had too add functions but was too lazy to rewrite all the numbers. It should start at 1 */
         cout << "Enter name of file to read: (enter 'DEFAULT' to read loaded file) ";
         cin >> file_name;
         if (file_name == "DEFAULT" && file_loaded) {
@@ -145,7 +160,7 @@ int main() {
         CaesarShift(file, file_name, shift, -1, parameters);
         break;
       case 12:
-        Accents(file);
+        Accents(file); /// shoudl be removed 
         break;
       case 13:
         Settings(parameters);
@@ -169,7 +184,7 @@ int main() {
 }
 string GetFileName() { /// possible additions: makes sure file is in the right location
   string file_name;
-  ///cout << "File must be in C:\Users\[Username]\workspace\String Manipulator" << endl;
+  //cout << "File must be in C:\Users\[Username]\workspace\String Manipulator" << endl;
   cout << "Enter file name: ";
   cin >> file_name;
   return file_name;
